@@ -20,3 +20,5 @@ Angular 6 Setup
     Add "../node_modules/bootstrap/dist/css/bootstrap.min.css" in apps/styles (above style.css)
 06) Run our project: ng serve -o    
 07) To create component: ng g c employees/listEmployees --spect false --flat true
+
+https://www.youtube.com/watch?v=pcOaAU_iaD4&list=PL6n9fhu94yhXwcl3a6rIfAI7QmGYIkfK5&index=3
