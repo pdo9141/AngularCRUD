@@ -39,6 +39,71 @@ Angular 2 Notes
 12) Structual directive ngFor: <tr *ngFor="let employee of employees"><td>{{employee.annualSalary}}</td></tr>
     <tr *ngIf="!employees || employees.length == 0"><td>No employees to display</td></tr>
 13) Be careful using ngFor with large lists. It will perform poorly. A small change to the list may trigger a cascade of DOM manipulations.     
+14) For large lists, use ngFor with trackBy, this tells Angular to be smarter about modifying DOM.
+    <tr *ngFor="let employee of employess; trackBy:trackByEmpCode; let i=index; let isFirst=first; let isLast=last;let isEven=even; let isOdd=odd">
+    trackByEmpCode(index: number, employee: any) :string { return employee.code; }
+15) Angular Pipes: transform value before display, you can create custom pipes as well. {{employee.code | uppercase}}
+    {{employee.dateOfBirth | date:'fullDate' | uppercase}}, {{employee.annualSalary | currency:'USD':true:'1.3-3'}}
+16) To pass values from container component to nested component: import Input from angular/core and decorate fields in nested component with @Input()
+    <employee-count *ngIf="employees" [all]="getTotalEmployeesCount()" [male]="getTotalMaleEmployeesCount()" (countRadioButtonSelectionChanged)="onEmployeeCountRadoButtonChange($event)"></employee-count>
+17) To update container component from nested component from user action: raise event from nested component using Output and EventEmitter from angular core.
+    <input type="radio" name="options" value="All" [(ngModel)]="selectedRadioButtonValue" (change)="onRadioButtonSelectionChange()" />
+    selectedRadioButtonValue: string = 'All';
 
+    @Output()
+    countRadioButtonSelectionChanged: EventEmitter<string> = new EventEmitter<string>();
 
-https://www.youtube.com/watch?v=dEIg-PR4Tew&list=PL6n9fhu94yhWqGD8BuKuX-VTKqlNBj-m6&index=17
+    onRadioButtonSelectionChange() { this.countRadioButtonSelectionChanged.emit(this.selectedRadioButtonValue); }
+
+    <ng-container *ngFor="let employee of employess;">
+        <tr *ngIf="selectedEmployeeCountRadioButton === 'All' || selectedEmployeeCountRadioButton === employee.gender">
+            <td></td>
+        </tr>
+    </ng-container>
+18) When do you use Interfaces in Angular: use interfaces to replace the any type to get strong type intellisense. 
+    export class Employee implements IEmployee {
+        constructor(public code: string, public name: string, public gender: string) {}
+    }
+19) Angular component lifecycle hooks: ngOnChanges, ngOnInit, ngOnDestroy are most common.
+20) When do you use a service in Angular? It's generally used when you need to reuse data or logic across multiple components.
+    Import Injectable from angular/core and decorate your service with @Injectable()
+    Make service calls in ngOnInit no constructor, make sure you use *ngIf for all components that expect service data to already be returned.
+    ngOnInit() { 
+        this.employees = this._employeeService.GetEmployees().subscribe(
+            (employeeData) => this.employees = employeeData
+        ); 
+    }
+21) Include HttpModule form angular/core to issue web service calls over HTTP. Import Http from angular/http, inject into constructor. 
+    import { Injectable } from '@angular/core';
+    import { IEmployee } from './employee';    
+    import { Http, Response } from '@angular/http';
+    import { Observable } from 'rxjs/Observable';
+    import 'rxjs/add/operator/map';
+
+    @Injectable()
+    export class EmployeeService {
+        constuctor(private _http: Http) {}
+        getEmployees(): Observable<IEmployee[]> {
+            return this._http.get("https://localhost:3000/api/employees")
+                .map((response: Response) => <IEmployee[]>response.json())
+        }
+    }
+22) Update your Web.API project to allow CORS:
+    <system.webServer>
+        <httpProtocol>
+            <customHeaders>
+                <add name="Access-Control-Allow-Origin" value="*" />
+                <add name="Access-Control-Allow-Headers" value="Content-Type" />
+                <add name="Access-Control-Allow-Methods" value="GET, POST, PUT, DELETE, OPTIONS" />
+            </customHeaders>
+        </httpProtocol>
+    </system.webServer>
+23) After you rebuild VS solution you'll encounter JIT loading issues, add logic to show loading:
+    <tr *ngIf="!employees">
+        <td colspan="5">
+            Loading data. Please wait...
+        </td>
+    </tr>    
+
+Continue at video 28
+https://www.youtube.com/watch?v=gJKuil24Jag&list=PL6n9fhu94yhWqGD8BuKuX-VTKqlNBj-m6&index=28
