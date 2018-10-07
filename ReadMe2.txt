@@ -70,7 +70,8 @@ Angular 2 Notes
     Make service calls in ngOnInit no constructor, make sure you use *ngIf for all components that expect service data to already be returned.
     ngOnInit() { 
         this.employees = this._employeeService.GetEmployees().subscribe(
-            (employeeData) => this.employees = employeeData
+            (employeeData) => this.employees = employeeData,
+            (error) => { console.error(error); }
         ); 
     }
 21) Include HttpModule form angular/core to issue web service calls over HTTP. Import Http from angular/http, inject into constructor. 
@@ -79,6 +80,8 @@ Angular 2 Notes
     import { Http, Response } from '@angular/http';
     import { Observable } from 'rxjs/Observable';
     import 'rxjs/add/operator/map';
+    import 'rxjs/add/operator/catch';
+    import 'rxjs/add/Observable/throw';
 
     @Injectable()
     export class EmployeeService {
@@ -86,7 +89,9 @@ Angular 2 Notes
         getEmployees(): Observable<IEmployee[]> {
             return this._http.get("https://localhost:3000/api/employees")
                 .map((response: Response) => <IEmployee[]>response.json())
+                .catch(this.handleError);
         }
+        handleError(error: Response) { return Observable.throw(error); }
     }
 22) Update your Web.API project to allow CORS:
     <system.webServer>
@@ -104,6 +109,45 @@ Angular 2 Notes
             Loading data. Please wait...
         </td>
     </tr>    
+24) Bootstrap with Angular: run command in root Angular project: npm install bootstrap@3 jquery --save
+    Option 1) Go to your index.html and add reference to jquery and bootstrap files from node_modules
+    To get Bootstrap intellisense, go to "Include In Project" the bootstrap folder in node_modules
+    Option 2) Install Bootstrap using Nuget, you won't have to do anything special to enable intellisense, option 1 is better
+    Option 3) Reference CDN links directly in your index.html
+25) Angular routing steps:
+    Step 1) Set <base href="/src/">
+    Step 2) Import RouterModule and define routes, keep in mind order of Routes[] is very important (specific to general routes)
+    Step 3) Tie the routes to application menu. 
+            <li routerLinkActive="active"><a routerLink="home">Home</a></li>            
+            <li routerLinkActive="active"><a routerLink="employees">Employees</a></li>            
+            <router-outlet></router-outlet>
+    Step 4) Add url-rewrite rule into web.config (don't need this if using hash routing, RouterModule.forRoot(appRoutes, { useHash: true }))
+            <system.webServer>            
+                <rewrite>
+                    <rules>
+                        <rule name="Angular Routes" stopProcessing="true">
+                            <match url="*" />
+                            <conditions logicalGrouping="MatchAll">
+                                <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+                                <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
+                            </conditions>
+                            <action type="Rewrite" url="/src/" />
+                        </rule>
+                    </rules>
+                </rewrite>
+            </system.webServer>            
+26) Angular route parameters steps:
+    Step 1) Create the route with a parameter
+            const appRoutes: Routes = [
+                { path: 'employees', component: EmployeeListComponent },                    
+                { path: 'employees/:code', component: EmployeeListComponent }
+            ];
+    Step 2) Bind to the route using [routerLink] directive. In the binding we are using link parameters array
+            <a [routerLink]="['/employees', employee.code]">{{employee.code | uppercase}}</a>
+    Step 3) Use the ActivatedRoute service to retrieve the parameter value from the URL            
+27) Register your provider for your service at app.moudle.ts to keep service as singleton and avoid DRY by not having to specify provider in multiple components
 
-Continue at video 28
-https://www.youtube.com/watch?v=gJKuil24Jag&list=PL6n9fhu94yhWqGD8BuKuX-VTKqlNBj-m6&index=28
+
+
+Continue on video 32
+https://www.youtube.com/watch?v=jWODteEGQmw&list=PL6n9fhu94yhWqGD8BuKuX-VTKqlNBj-m6&index=32
