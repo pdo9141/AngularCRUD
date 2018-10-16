@@ -145,9 +145,18 @@ Angular 2 Notes
     Step 2) Bind to the route using [routerLink] directive. In the binding we are using link parameters array
             <a [routerLink]="['/employees', employee.code]">{{employee.code | uppercase}}</a>
     Step 3) Use the ActivatedRoute service to retrieve the parameter value from the URL            
-27) Register your provider for your service at app.moudle.ts to keep service as singleton and avoid DRY by not having to specify provider in multiple components
-
-
-
-Continue on video 32
-https://www.youtube.com/watch?v=jWODteEGQmw&list=PL6n9fhu94yhWqGD8BuKuX-VTKqlNBj-m6&index=32
+27) Register your provider for your service at app.module.ts to keep service as singleton and avoid DRY by not having to specify provider in multiple components
+28) Dependency Injection: the Angular injector creates instance of component and injects dependencies into constructor. The Angular injector knows what instance to
+    create us registering service using providers property of @NgModule or @Component decorators. Angular will provide Singleton instance.
+    constructor(private _employeeService: EmployeeService) { /* shorthand syntax */ }
+29) Use @Injectable components to share state across components
+30) If not using singleton, everytime you navigate away from one component to another that component is disposed and new compnent and constructor will be invoked.
+31) Angular Injector can be injected at many levels: root app injector (@NgModule providers), appComponent injector (@Component providers), component injector
+32) Angular router navigate method: to programmatically navigate from one component to another in event handler, import Router.
+    this._router.navigate(['/employees'])
+33) Promises in Angular 2: by default, the Angular built-in HTTP service returns Observable instead of promises. To change this, import 'rxjs/add/operator/toPromise'.
+    Now change return type of service method to Promise<IEmployee> and use .toPromise(). Now change client code to use .then() instead of .subscribe()
+34) Why promises vs observables? Observables allow built-in retry functionality. Observables are lazy loaded, if you don't subscribe the service call will not be made.    
+    You can also cancel an observable by unsubscribing
+    
+https://www.youtube.com/watch?v=003Y8ip3TaU&list=PL6n9fhu94yhWqGD8BuKuX-VTKqlNBj-m6&index=43
